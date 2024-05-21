@@ -17,6 +17,7 @@
 #include <tuple>
 #include <type_traits>
 #include <immintrin.h>
+#include <cstdint>
 
 namespace mortonnd {
 
@@ -118,6 +119,11 @@ public:
         return DecodeInternal(encoding, std::make_index_sequence<Dimensions>{});
     }
 
+    static inline auto DecodeArray(T encoding)
+    {
+        return DecodeInternalArray(encoding, std::make_index_sequence<Dimensions>{});
+    }
+
 private:
     MortonNDBmi() = default;
 
@@ -139,6 +145,13 @@ private:
     {
         return std::make_tuple(Extract<i>(encoding)...);
     }
+
+    template<size_t... i>
+    static inline auto DecodeInternalArray(T encoding, std::index_sequence<i...>)
+    {
+        return std::array<T, Dimensions>{Extract<i>(encoding)...};
+    }
+
 
     template<size_t FieldIndex>
     static inline uint32_t Deposit(uint32_t field) {
