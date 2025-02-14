@@ -502,6 +502,24 @@ public:
         return DecodeInternal(input, std::make_index_sequence<ChunkCount>{});
     }
 
+    // Replace the previous DecodeArray with this direct implementation:
+    constexpr std::array<T, Dimensions> DecodeArray(T input) const
+    {
+        std::array<T, Dimensions> result{}; // Zero-initialized array
+        for (std::size_t chunkIndex = 0; chunkIndex < ChunkCount; ++chunkIndex) {
+            const std::size_t chunkStartBit = chunkIndex * LutBits;
+            const std::size_t lutIndex = static_cast<std::size_t>((input >> chunkStartBit) & ChunkMask);
+            const auto& lutEntry = LookupTable[lutIndex];
+            for (std::size_t i = 0; i < Dimensions; ++i) {
+                const std::size_t fieldStartIndex = chunkStartBit + i;
+                const std::size_t destIndex = fieldStartIndex % Dimensions;
+                const std::size_t insertOffset = fieldStartIndex / Dimensions;
+                result[destIndex] = (static_cast<T>(lutEntry[i]) << insertOffset) | result[destIndex];
+            }
+        }
+    return result;
+    }
+
 private:
     template<std::size_t ChunkStartBit, typename ResultTuple, std::size_t ...I>
     constexpr auto MapComponents(ResultTuple& result, const std::array<LutValue, Dimensions>& chunkLookupResult, std::index_sequence<I...>) const {
