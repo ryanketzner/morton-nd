@@ -74,6 +74,9 @@ template<std::size_t Dimensions, typename T>
 class MortonNDBmi
 {
 public:
+    
+    MortonNDBmi() = default;
+
     static constexpr auto FieldBits = std::size_t(std::numeric_limits<T>::digits) / Dimensions;
 
     static_assert(Dimensions > 0, "'Dimensions' must be > 0.");
@@ -125,7 +128,6 @@ public:
     }
 
 private:
-    MortonNDBmi() = default;
 
     static const T Selector = BuildSelector<FieldBits>(Dimensions);
 
