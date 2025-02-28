@@ -266,6 +266,27 @@ public:
         return EncodeInternal(field0, fields...);
     }
 
+    /**
+     * Addon by Ryan: Calculates the Morton encoding for an array of input fields.
+     *
+     * This method processes the input array in reverse order to match
+     * the behavior of the existing variadic Encode function. The last element in
+     * the array is processed first, contributing to the least-significant bits.
+     *
+     * @param fields A std::array containing exactly 'Dimensions' input fields.
+     * @return The calculated Morton code.
+     */
+    constexpr T EncodeArray(const std::array<T, Dimensions>& fields) const {
+        // Start with the last field in the array (this is processed first in the recursive version)
+        T result = LookupField(fields[Dimensions - 1], std::make_index_sequence<ChunkCount>{});
+        // Process the remaining fields in reverse order.
+        // For each field, shift the accumulated result left by 1 bit and OR in the lookup value for the current field.
+        for (std::size_t i = Dimensions - 1; i > 0; --i) {
+            result = (result << 1U) | LookupField(fields[i - 1], std::make_index_sequence<ChunkCount>{});
+        }
+        return result;
+    }
+
 private:
     template<typename...Args>
     constexpr T EncodeInternal(T field1, Args... fields) const
