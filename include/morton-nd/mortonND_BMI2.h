@@ -74,6 +74,11 @@ template<std::size_t Dimensions, typename T>
 class MortonNDBmi
 {
 public:
+
+    /**
+     * The type used for encoding/decoding inputs as well as the result.
+     */
+    typedef T type;
     
     MortonNDBmi() = default;
 
